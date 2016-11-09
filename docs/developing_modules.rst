@@ -1,21 +1,19 @@
-Developing Modules
+开发模块
 ==================
 
 .. contents:: Topics
 
-Ansible modules are reusable units of magic that can be used by the Ansible API,
+Ansible 模块 are reusable units of magic that can be used by the Ansible API,
 or by the `ansible` or `ansible-playbook` programs.
 
-See :doc:`modules` for a list of various ones developed in core.
+参见 :doc:`modules` 当前的核心模块列表.
 
-Modules can be written in any language and are found in the path specified
-by `ANSIBLE_LIBRARY` or the ``--module-path`` command line option.
+可以用任何语言来编写模块，只要它在 `ANSIBLE_LIBRARY` 或者命令行 ``--module-path``指定的路径中。
 
-By default, everything that ships with ansible is pulled from its source tree, but
+缺省情况下, everything that ships with ansible is pulled from its source tree, but
 additional paths can be added.
 
-The directory "./library", alongside your top level playbooks, is also automatically
-added as a search directory.
+你 Playbook 顶级目录的 "./library" 会被自动加到搜索路径中。
 
 Should you develop an interesting Ansible module, consider sending a pull request to the
 `modules-extras project <https://github.com/ansible/ansible-modules-extras>`_.  There's also a core
@@ -28,17 +26,15 @@ of how you acquire ansible.
 Tutorial
 ````````
 
-Let's build a very-basic module to get and set the system time.  For starters, let's build
-a module that just outputs the current time.
+在本教程中， 我们要创建一个获取系统时间的 Module.  为照顾初学者，我们只是让这个模块输出当前时间。
 
-We are going to use Python here but any language is possible.  Only File I/O and outputting to standard
-out are required.  So, bash, C++, clojure, Python, Ruby, whatever you want
-is fine.
+我们准备使用 Python 来开发这个模块。这里只需要用到 File IO 和标准输出，因此，其它的语言，如 bash, C++, clojure, Python, Ruby, 等等，都可以。
 
-Now Python Ansible modules contain some extremely powerful shortcuts (that all the core modules use)
-but first we are going to build a module the very hard way.  The reason we do this is because modules
-written in any language OTHER than Python are going to have to do exactly this.  We'll show the easy
-way later.
+现在的 Python Ansible 模块有一个很方便的快捷方式 (几乎所有的核心模块都使用了这种快捷方式)。
+
+但一开始，我们打算用困难的方式来创建模块。原因是，PYTHON 之外的其它语言必须要这么做。
+
+之后，我们再看简单的方法。
 
 So, here's an example.  You would never really need to build a module to set the system time,
 the 'command' module could already be used to do this.  Though we're going to make one.
@@ -46,9 +42,9 @@ the 'command' module could already be used to do this.  Though we're going to ma
 Reading the modules that come with ansible (linked above) is a great way to learn how to write
 modules.   Keep in mind, though, that some modules in ansible's source tree are internalisms,
 so look at `service` or `yum`, and don't stare too close into things like `async_wrapper` or
-you'll turn to stone.  Nobody ever executes async_wrapper directly.
+you'll turn to stone.  没有人会直接执行 async_wrapper。
 
-Ok, let's get going with an example.  We'll use Python.  For starters, save this as a file named `timetest.py`::
+Ok, let's get going with an example.  We'll use Python.  我们把这个文件命名为 `timetest.py`::
 
     #!/usr/bin/python
 
@@ -83,22 +79,23 @@ If you did not, you might have a typo in your module, so recheck it and try agai
 
 .. _reading_input:
 
-Reading Input
+读取输入
 `````````````
 
 
-Let's modify the module to allow setting the current time.  We'll do this by seeing
-if a key value pair in the form `time=<string>` is passed in to the module.
+让我们来修改这个模块，以允许对当前时间进行设置。 具体来说，就是检查是否把 key value 对以 `time=<string>`的形式，传递给了模块。
 
-Ansible internally saves arguments to an arguments file.  So we must read the file
-and parse it.  The arguments file is just a string, so any form of arguments are legal.
+Ansible 内部会把参数存为一个参数文件。因此，我们必须读这个文件，并进行解析。
+
+参数文件就是一个字符串，因此，可以支持任何形式的参数。
+
 Here we'll do some basic parsing to treat the input as key=value.
 
 The example usage we are trying to achieve to set the time is::
 
    time time="March 14 22:10"
 
-If no time parameter is set, we'll just leave the time as is and return the current time.
+如果不time parameter is set, we'll just leave the time as is and return the current time.
 
 .. note::
    This is obviously an unrealistic idea for a module.  You'd most likely just
