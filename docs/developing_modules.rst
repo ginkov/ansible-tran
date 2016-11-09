@@ -1,7 +1,7 @@
 开发模块
 ==================
 
-.. contents:: Topics
+.. contents:: 目录
 
 Ansible 模块 are reusable units of magic that can be used by the Ansible API,
 or by the `ansible` or `ansible-playbook` programs.
@@ -26,13 +26,13 @@ of how you acquire ansible.
 教程
 ````````
 
-在本教程中， 我们要创建一个获取系统时间的 Module.  为照顾初学者，我们只是让这个模块输出当前时间。
+在这个教程中， 我们将创建一个获取系统时间的模块。一开始，我们只是让这个模块输出当前时间。
 
-我们准备使用 Python 来开发这个模块。这里只需要用到 File IO 和标准输出，因此，其它的语言，如 bash, C++, clojure, Python, Ruby, 等等，都可以。
+我们将用 Python 来开发这个模块。由于此过程中只需要用到 File IO 和标准输出，因此，也可以其它的语言，如 bash, C++, clojure, Python, Ruby, 等等任何你喜欢的语言，来开发这个模块。
 
-现在的 Python Ansible 模块有一个很方便的快捷方式 (几乎所有的核心模块都使用了这种快捷方式)。
+现在的 Python Ansible 模块有一个很方便的快捷方式，用以开发模块。几乎所有的核心模块都使用了这种快捷方式。
 
-但一开始，我们打算用困难的方式来创建模块。原因是，PYTHON 之外的其它语言必须要这么做。
+但一开始，我们打算用原始的方式来创建模块。原因是，PYTHON 之外的其它语言必须要这么做。
 
 之后，我们再看简单的方法。
 
@@ -44,7 +44,7 @@ modules.   Keep in mind, though, that some modules in ansible's source tree are 
 so look at `service` or `yum`, and don't stare too close into things like `async_wrapper` or
 you'll turn to stone.  没有人会直接执行 async_wrapper。
 
-Ok, let's get going with an example.  We'll use Python.  我们把这个文件命名为 `timetest.py`::
+好，让我们看具体的例子。我们使用 Python，把模块文件命名为 `timetest.py`::
 
     #!/usr/bin/python
 
@@ -61,21 +61,21 @@ Ok, let's get going with an example.  We'll use Python.  我们把这个文件�
 测试模块
 ```````````````
 
-There's a useful test script in the source checkout for ansible::
+Ansible 的原代码里有个有用的测试脚本：
 
     git clone git@github.com:ansible/ansible.git --recursive
     source ansible/hacking/env-setup
     chmod +x ansible/hacking/test-module
 
-Let's run the script you just wrote with that::
+让我们来测试刚才的模块::
 
     ansible/hacking/test-module -m ./timetest.py
 
-You should see output that looks something like this::
+输出结果类似下面::
 
     {u'time': u'2012-03-14 22:13:48.539183'}
 
-If you did not, you might have a typo in your module, so recheck it and try again.
+如果不是这样，那你刚才的模块里可能有一些打字错误，建议修改后重试。
 
 .. _reading_input:
 
@@ -185,7 +185,7 @@ a lot shorter than this::
 
     ansible/hacking/test-module -m ./time -a time=\"March 14 12:23\"
 
-This should return something like::
+返回结果类似下面::
 
     {"changed": true, "time": "2012-03-14 12:23:00.000307"}
 
@@ -194,7 +194,7 @@ This should return something like::
 Module Provided 'Facts'
 ```````````````````````
 
-Ansible 自带的 'setup' 模块module that ships with Ansible provides many variables about a system that can be used in playbooks
+Ansible 自带的 'setup' 模块 that ships with Ansible provides many variables about a system that can be used in playbooks
 and templates.  However, it's possible to also add your own facts without modifying the system module.  To do
 this, just have the module return a `ansible_facts` key, like so, along with other return data::
 
@@ -246,11 +246,11 @@ And instantiating the module class like::
 
 AnsibleModule 提供了很多通用代码，用以处理返回值，解析参数，检查输入。
 
-Successful returns are made like this::
+成功时的返回结果是这样子滴::
 
     module.exit_json(changed=True, something_else=12345)
 
-And failures are just as simple (where 'msg' is a required parameter to explain the error)::
+失败时的返回也很简单 (where 'msg' is a required parameter to explain the error)::
 
     module.fail_json(msg="Something fatal happened")
 
