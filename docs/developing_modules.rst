@@ -23,7 +23,7 @@ of how you acquire ansible.
 
 .. _module_dev_tutorial:
 
-Tutorial
+教程
 ````````
 
 在本教程中， 我们要创建一个获取系统时间的 Module.  为照顾初学者，我们只是让这个模块输出当前时间。
@@ -58,7 +58,7 @@ Ok, let's get going with an example.  We'll use Python.  我们把这个文件�
 
 .. _module_testing:
 
-Testing Modules
+测试模块
 ```````````````
 
 There's a useful test script in the source checkout for ansible::
@@ -95,13 +95,13 @@ The example usage we are trying to achieve to set the time is::
 
    time time="March 14 22:10"
 
-如果不time parameter is set, we'll just leave the time as is and return the current time.
+如果不指定 time 参数，则不会修改时间，只是返回当前时间。
 
 .. note::
    This is obviously an unrealistic idea for a module.  You'd most likely just
    use the shell module.  However, it probably makes a decent tutorial.
 
-Let's look at the code.  Read the comments as we'll explain as we go.  Note that this
+让我们看代码.  Read the comments as we'll explain as we go.  Note that this
 is highly verbose because it's intended as an educational example.  You can write modules
 a lot shorter than this::
 
@@ -116,11 +116,11 @@ a lot shorter than this::
     import os
     import shlex
 
-    # read the argument string from the arguments file
+    # 从 arguments file 中读参数
     args_file = sys.argv[1]
     args_data = file(args_file).read()
 
-    # for this module, we're going to do key=value style arguments
+    # 对于这个模块，我们使用 key=value 风格来指定参数。
     # this is up to each module to decide what it wants, but all
     # core modules besides 'command' and 'shell' take key=value
     # so this is highly recommended
@@ -128,7 +128,7 @@ a lot shorter than this::
     arguments = shlex.split(args_data)
     for arg in arguments:
 
-        # ignore any arguments without an equals in it
+        # 忽略不含 = 的参数
         if "=" in arg:
 
             (key, value) = arg.split("=")
@@ -148,9 +148,9 @@ a lot shorter than this::
 
                 rc = os.system("date -s \"%s\"" % value)
 
-                # always handle all possible errors
+                # 一定要进行各种错误的处理
                 #
-                # when returning a failure, include 'failed'
+                # 当操作失败时, include 'failed'
                 # in the return data, and explain the failure
                 # in 'msg'.  Both of these conventions are
                 # required however additional keys and values
@@ -163,13 +163,10 @@ a lot shorter than this::
                     })
                     sys.exit(1)
 
-                # when things do not fail, we do not
-                # have any restrictions on what kinds of
-                # data are returned, but it's always a
-                # good idea to include whether or not
-                # a change was made, as that will allow
-                # notifiers to be used in playbooks.
-
+                # 如果没有失败，我们也不去检查返回日期的结果是否正确。
+                # 但是一定要说清楚是否进行了变更操作，这样在 Playbook
+                # 中就可以使用 notifier 了。
+                
                 date = str(datetime.datetime.now())
                 print json.dumps({
                     "time" : date,
@@ -177,16 +174,14 @@ a lot shorter than this::
                 })
                 sys.exit(0)
 
-    # if no parameters are sent, the module may or
-    # may not error out, this one will just
-    # return the time
+    # 如果没有指定参数，模块可能出错或者不出错，但只是返回时间。
 
     date = str(datetime.datetime.now())
     print json.dumps({
         "time" : date
     })
 
-Let's test that module::
+让我们来测试这个模块::
 
     ansible/hacking/test-module -m ./time -a time=\"March 14 12:23\"
 
@@ -199,7 +194,7 @@ This should return something like::
 Module Provided 'Facts'
 ```````````````````````
 
-The 'setup' module that ships with Ansible provides many variables about a system that can be used in playbooks
+Ansible 自带的 'setup' 模块module that ships with Ansible provides many variables about a system that can be used in playbooks
 and templates.  However, it's possible to also add your own facts without modifying the system module.  To do
 this, just have the module return a `ansible_facts` key, like so, along with other return data::
 
@@ -221,12 +216,12 @@ we're always open to improving the selection of core facts in Ansible as well.
 
 .. _common_module_boilerplate:
 
-Common Module Boilerplate
+通用模块生成模板
 `````````````````````````
 
-As mentioned, if you are writing a module in Python, there are some very powerful shortcuts you can use.
-Modules are still transferred as one file, but an arguments file is no longer needed, so these are not
-only shorter in terms of code, they are actually FASTER in terms of execution time.
+如前所说，如果你使用 Python 写模块的话，有一些非常强大的快捷方式。
+
+Modules are still transferred as one file, 但不再需要参数文件了。因此，不但代码短了，执行起来也更快了。
 
 Rather than mention these here, the best way to learn is to read some of the `source of the modules <https://github.com/ansible/ansible-modules-core>`_ that come with Ansible.
 
@@ -249,8 +244,7 @@ And instantiating the module class like::
         )
     )
 
-The AnsibleModule provides lots of common code for handling returns, parses your arguments
-for you, and allows you to check inputs.
+AnsibleModule 提供了很多通用代码，用以处理返回值，解析参数，检查输入。
 
 Successful returns are made like this::
 
@@ -263,7 +257,7 @@ And failures are just as simple (where 'msg' is a required parameter to explain 
 There are also other useful functions in the module class, such as module.sha1(path).  See
 lib/ansible/module_common.py in the source checkout for implementation details.
 
-Again, modules developed this way are best tested with the hacking/test-module script in the git
+同样， modules developed this way are best tested with the hacking/test-module script in the git
 source checkout.  Because of the magic involved, this is really the only way the scripts
 can function outside of Ansible.
 
@@ -276,11 +270,11 @@ Check Mode
 ``````````
 .. versionadded:: 1.1
 
-Modules may optionally support check mode. If the user runs Ansible in check
+模块可以选择支持 Check Mode。如果用户以 Check Mode 运行 Ansible in check
 mode, the module should try to predict whether changes will occur.
 
-For your module to support check mode, you must pass ``supports_check_mode=True``
-when instantiating the AnsibleModule object. The AnsibleModule.check_mode attribute
+如果你的模块支持 Check mode, 你必须在初始化 AnsibleModule 对象时，设定
+``supports_check_mode=True``. The AnsibleModule.check_mode attribute
 will evaluate to True when check mode is enabled. For example::
 
     module = AnsibleModule(
@@ -292,7 +286,7 @@ will evaluate to True when check mode is enabled. For example::
         # Check if any changes would be made but don't actually make those changes
         module.exit_json(changed=check_if_system_state_would_be_changed())
 
-Remember that, as module developer, you are responsible for ensuring that no
+记住，as module developer, you are responsible for ensuring that no
 system state is altered when the user enables check mode.
 
 If your module does not support check mode, when the user runs Ansible in check
@@ -300,17 +294,19 @@ mode, your module will simply be skipped.
 
 .. _module_dev_pitfalls:
 
-Common Pitfalls
+常见陷阱
 ```````````````
 
-You should also never do this in a module::
+不在模块里::
 
     print "some status message"
 
-Because the output is supposed to be valid JSON.
+因为要求输出必须是一个正确的 JSON。
 
-Modules must not output anything on standard error, because the system will merge
-standard out with standard error and prevent the JSON from parsing. Capturing standard
+不允许模块在 standard error 上输出任何内容，因为系统会把
+standard out 和 standard error 合并在一起，使用 JSON 无法正确解析。
+
+Capturing standard
 error and returning it as a variable in the JSON on standard out is fine, and is, in fact,
 how the command module is implemented.
 
@@ -322,11 +318,10 @@ you about these kind of things.
 
 .. _module_dev_conventions:
 
-Conventions/Recommendations
+约定/建议
 ```````````````````````````
 
-As a reminder from the example code above, here are some basic conventions
-and guidelines:
+As a reminder from the example code above, 以下是一些基本的原则和约定:
 
 * If the module is addressing an object, the parameter for that object should be called 'name' whenever possible, or accept 'name' as an alias.
 
@@ -340,9 +335,9 @@ and guidelines:
 
 * If packaging modules in an RPM, they only need to be installed on the control machine and should be dropped into /usr/share/ansible.  This is entirely optional and up to you.
 
-* Modules must output valid JSON only. The toplevel return type must be a hash (dictionary) although they can be nested.  Lists or simple scalar values are not supported, though they can be trivially contained inside a dictionary.
+* 模块的输出必须是有效的 JSON。 must output valid JSON only. The toplevel return type must be a hash (dictionary) although they can be nested.  Lists or simple scalar values are not supported, though they can be trivially contained inside a dictionary.
 
-* In the event of failure, a key of 'failed' should be included, along with a string explanation in 'msg'.  Modules that raise tracebacks (stacktraces) are generally considered 'poor' modules, though Ansible can deal with these returns and will automatically convert anything unparseable into a failed result.  If you are using the AnsibleModule common Python code, the 'failed' element will be included for you automatically when you call 'fail_json'.
+* 如果失败, a key of 'failed' should be included, along with a string explanation in 'msg'.  Modules that raise tracebacks (stacktraces) are generally considered 'poor' modules, though Ansible can deal with these returns and will automatically convert anything unparseable into a failed result.  If you are using the AnsibleModule common Python code, the 'failed' element will be included for you automatically when you call 'fail_json'.
 
 * Return codes from modules are not actually not significant, but continue on with 0=success and non-zero=failure for reasons of future proofing.
 
@@ -350,7 +345,7 @@ and guidelines:
 
 .. _module_documenting:
 
-Documenting Your Module
+编写模块文档
 ```````````````````````
 
 All modules included in the CORE distribution must have a
